@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LiveViu Real-Time Coaching Assistant</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-4">
@@ -33,6 +34,13 @@
       <ul id="behavioralFeedback" class="bg-gray-800 p-3 rounded text-sm space-y-2"></ul>
     </div>
 
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-cyan-300 mb-2">Conversation Metric Graph</h2>
+      <div class="bg-gray-800 p-4 rounded">
+        <canvas id="metricChart"></canvas>
+      </div>
+    </div>
+
     <div>
       <h2 class="text-xl font-semibold text-purple-300 mb-2">Carrier Recommendations</h2>
       <ul id="carrierSuggestions" class="bg-gray-800 p-3 rounded text-sm space-y-2 text-green-200"></ul>
@@ -41,3 +49,4 @@
   </div>
 </body>
 </html>
+
