@@ -1,138 +1,78 @@
-// script.js (Real-Time Coaching - Call Flow Integrated Demo)
 
-const demoState = "TX";
-const stateInput = document.getElementById("stateSelect");
-const transcriptEl = document.getElementById("transcript");
-const behaviorList = document.getElementById("behavioralFeedback");
-const carrierList = document.getElementById("carrierSuggestions");
-const missedCarriers = document.getElementById("missedCarriers");
-const demoToggle = document.getElementById("demoToggle");
+document.addEventListener("DOMContentLoaded", () => {
+  const transcriptEl = document.getElementById("transcript");
+  const behavioralFeedbackEl = document.getElementById("behavioralFeedback");
+  const carrierSuggestionsEl = document.getElementById("carrierSuggestions");
+  const missedCarriersEl = document.getElementById("missedCarriers");
 
-const callScript = [
-  // INTRO
-  { speaker: "Agent", text: "Thanks for calling, this is Jordan at VIU by HUB. Who am I speaking with today?", tips: ["Always state your name and agency in intro."] },
-  { speaker: "Customer", text: "Hi, this is Mark Williams.", tips: [] },
+  const bindChecklistItems = [
+    "Confirm household drivers to list or exclude",
+    "Ask underwriting questions",
+    "Customer registers on carrier website",
+    "Complete e-sign process",
+    "Mask call during payment"
+  ];
 
-  // RAPPORT
-  { speaker: "Agent", text: "Great to meet you Mark! Thanks for taking time today — what inspired the call?", tips: ["Personalize the welcome and ask an open question."] },
-  { speaker: "Customer", text: "My renewal jumped. I’m frustrated honestly.", tips: ["Empathize with tone and acknowledge pain point."] },
+  // Simulated call script for demo mode
+  const demoScript = [
+    { speaker: "Customer", text: "Hi, I'm shopping for auto insurance." },
+    { speaker: "Agent", text: "Great! Can I start by confirming all household drivers?" },
+    { speaker: "Customer", text: "Yes, it's just me and my spouse." },
+    { speaker: "Agent", text: "Thanks. Any recent claims or tickets?" },
+    { speaker: "Customer", text: "No, clean record." },
+    { speaker: "Agent", text: "Perfect. Let’s talk coverage options." },
+    { speaker: "Customer", text: "Sounds good." },
+    { speaker: "Agent", text: "You might qualify for a multi-policy discount if we bundle auto and home." },
+    { speaker: "Customer", text: "Let me check with my spouse." },
+    { speaker: "Agent", text: "Sure — what concerns do you think your spouse might have?" },
+    { speaker: "Customer", text: "Probably price. We want to save more." },
+    { speaker: "Agent", text: "No problem — let me check a few more carriers to find better pricing for the same coverage." },
+    { speaker: "Agent", text: "Good news — we have an option that’s $25/month less with better roadside coverage included." },
+    { speaker: "Agent", text: "Let’s walk through the bind process together. First, confirm all household drivers to list or exclude. Then I’ll ask a few underwriting questions. After that, you’ll get an email to create your carrier account and complete the e-sign process. Once ready, I’ll pause the call while you enter payment securely. Ready to begin?" }
+  ];
 
-  // VERIFICATION
-  { speaker: "Agent", text: "Let's verify a few details before quoting — can I confirm your address and birthdate?", tips: ["Use confident tone during verification."] },
-  { speaker: "Customer", text: "Sure. It’s 456 Main Street, born 1/2/84.", tips: [] },
-
-  // DISCOVERY
-  { speaker: "Agent", text: "And what kind of coverage do you currently have? Are you bundling anything today?", tips: ["Start identifying gaps or bundling potential."] },
-  { speaker: "Customer", text: "Just auto. No bundle. I’m with Allstate.", tips: ["Now you can recommend bundle options."] },
-
-  // COVERAGE DISCUSSION
-  { speaker: "Agent", text: "Got it. Do you want to keep the same limits or explore more coverage for better protection?", tips: ["Offer choice of status quo vs upgrade."] },
-  { speaker: "Customer", text: "I’m open to options.", tips: [] },
-
-  // DISCOUNTS
-  { speaker: "Agent", text: "Perfect. You may qualify for safe driver, multi-policy, and paid-in-full discounts — let’s see what stacks.", tips: ["Stack at least 2 discounts during quote."],
-    carriers: ["Progressive + ASI", "Safeco", "Nationwide"] },
-
-  // BUNDLING
-  { speaker: "Agent", text: "If we bundle auto and home, we’re looking at ~22% savings on average in Texas.", tips: ["Bundle early — top agents mention it in the first 2 minutes."] },
-
-  // OBJECTION
-  { speaker: "Customer", text: "That still sounds expensive though...", tips: [] },
-  { speaker: "Agent", text: "Absolutely — and I want to respect your budget. Let’s compare your current coverage apples-to-apples.", tips: ["Use the ‘Absolutely’ method within 5 seconds."] },
-
-  // SALES PITCH
-  { speaker: "Agent", text: "So with the discounts and bundling, we’re at $178/month — $29 less than your current rate, with better liability and roadside included.", tips: ["Present value and savings clearly."] },
-
-  // CLOSING
-  { speaker: "Agent", text: "Would you prefer to start with the full coverage bundle or a liability-only version today?", tips: ["Offer choice instead of asking if they want it."] },
-  { speaker: "Customer", text: "Let’s go with the full coverage bundle.", tips: [] },
-
-  // FOLLOW-UP
-  { speaker: "Agent", text: "Awesome. I’ll send your docs now and follow up by email just in case you have questions.", tips: ["Always confirm next steps before ending."] }
-];
-
-const metricGraphData = [
-  { name: "Talk Ratio", value: 61, color: "#60a5fa" },
-  { name: "Patience (s)", value: 0.52, color: "#facc15" },
-  { name: "Monologue (s)", value: 31, color: "#34d399" }
-];
-
-function loadChart() {
-  const canvas = document.createElement("canvas");
-  canvas.id = "metricChart";
-  document.getElementById("metricGraph").appendChild(canvas);
-
-  new Chart(canvas, {
-    type: "bar",
-    data: {
-      labels: metricGraphData.map((d) => d.name),
-      datasets: [
-        {
-          label: "Performance Metrics",
-          data: metricGraphData.map((d) => d.value),
-          backgroundColor: metricGraphData.map((d) => d.color)
-        }
-      ]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          suggestedMax: 100
-        }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
-}
-
-function runStepDemo() {
-  stateInput.value = demoState;
-  transcriptEl.innerHTML = "";
-  behaviorList.innerHTML = "";
-  carrierList.innerHTML = "";
-  missedCarriers.innerText = "";
-
-  let i = 0;
-  const interval = setInterval(() => {
-    const line = callScript[i];
-    const speakerClass = line.speaker === "Agent" ? "text-blue-400" : "text-green-400";
-    transcriptEl.innerHTML += `<p><span class="${speakerClass}">${line.speaker}:</span> ${line.text}</p>`;
-    transcriptEl.scrollTop = transcriptEl.scrollHeight;
-
-    if (line.tips.length) {
-      line.tips.forEach((tip) => {
-        const li = document.createElement("li");
-        li.className = "bg-gray-700 p-2 rounded";
-        li.textContent = tip;
-        behaviorList.appendChild(li);
-      });
-    }
-
-    if (line.carriers?.length) {
-      carrierList.innerHTML = line.carriers.map((c) => `<li>${c}</li>`).join("");
-      missedCarriers.innerText = "Also consider Root or Foremost for monoline auto if bundling fails.";
-    }
-
-    i++;
-    if (i >= callScript.length) {
-      clearInterval(interval);
-      loadChart();
-    }
-  }, 3000);
-}
-
-demoToggle.addEventListener("change", (e) => {
-  if (e.target.checked) {
-    runStepDemo();
-  } else {
+  function runDemo() {
     transcriptEl.innerHTML = "";
-    behaviorList.innerHTML = "";
-    carrierList.innerHTML = "";
-    missedCarriers.innerText = "";
-    document.getElementById("metricGraph").innerHTML = "";
-    stateInput.value = "";
+    behavioralFeedbackEl.innerHTML = "";
+    carrierSuggestionsEl.innerHTML = "<li>Progressive - lower premium found</li><li>Safeco - strong bundle opportunity</li>";
+    missedCarriersEl.textContent = "Missed quoting: Nationwide, Root";
+
+    const checkboxes = document.querySelectorAll("#bindChecklist input[type='checkbox']");
+    checkboxes.forEach(cb => cb.checked = false);
+
+    demoScript.forEach((line, index) => {
+      setTimeout(() => {
+        const p = document.createElement("p");
+        p.innerHTML = `<span class='font-bold text-blue-300'>${line.speaker}:</span> ${line.text}`;
+        transcriptEl.appendChild(p);
+        transcriptEl.scrollTop = transcriptEl.scrollHeight;
+
+        // Trigger behavioral tips
+        if (line.text.includes("confirm all household drivers")) {
+          behavioralFeedbackEl.innerHTML = "<li>Good start! Asking about drivers early improves accuracy.</li>";
+          checkboxes[0].checked = true;
+        }
+        if (line.text.includes("underwriting")) {
+          behavioralFeedbackEl.innerHTML += "<li>Nice — capturing underwriting info early supports compliance.</li>";
+          checkboxes[1].checked = true;
+        }
+        if (line.text.includes("multi-policy")) {
+          behavioralFeedbackEl.innerHTML += "<li>Smart — bundling boosts retention and discount eligibility.</li>";
+        }
+        if (line.text.includes("concerns do you think your spouse")) {
+          behavioralFeedbackEl.innerHTML += "<li>Pro move — uncovering hidden objections increases close rate.</li>";
+        }
+        if (line.text.includes("create your carrier account")) {
+          checkboxes[2].checked = true;
+          checkboxes[3].checked = true;
+          checkboxes[4].checked = true;
+        }
+
+      }, index * 3000);
+    });
   }
+
+  document.getElementById("demoToggle").addEventListener("change", (e) => {
+    if (e.target.checked) runDemo();
+  });
 });
