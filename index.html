@@ -3,55 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LiveViu Real-Time Coaching Assistant</title>
+  <title>Real-Time Coaching Assistant</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body class="bg-gray-900 text-white p-4">
   <div class="max-w-5xl mx-auto">
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold text-blue-400">LiveViu Real-Time Coaching Assistant</h1>
+      <h1 class="text-2xl font-bold">Real-Time Sales Coaching Assistant</h1>
       <label class="flex items-center space-x-2">
-        <input type="checkbox" id="demoToggle" class="accent-blue-500" />
+        <input type="checkbox" id="demoToggle" />
         <span class="text-sm">Demo Mode</span>
       </label>
     </div>
 
     <div class="mb-4">
-      <label for="stateSelect" class="block mb-1 text-sm text-gray-300">Detected State:</label>
+      <label for="stateSelect" class="block mb-1 text-sm">Detected State:</label>
       <input id="stateSelect" class="w-full bg-gray-800 text-white p-2 rounded" readonly />
     </div>
 
     <div class="bg-gray-800 p-4 rounded mb-4">
-      <h2 class="text-lg font-semibold text-green-400 mb-2">Live Transcript</h2>
-      <div id="transcript" class="h-48 overflow-y-auto text-sm text-gray-300"></div>
+      <h2 class="text-xl font-semibold mb-2">Live Transcript</h2>
+      <div id="transcript" class="h-40 overflow-y-auto text-sm text-gray-300"></div>
     </div>
 
-    <div class="bg-gray-800 p-4 rounded mb-4">
-      <h2 class="text-lg font-semibold text-yellow-400 mb-2">Behavioral Feedback</h2>
-      <ul id="behavioralFeedback" class="text-sm space-y-2 text-gray-200"></ul>
-      <div id="goldilocksTips" class="mt-4 text-xs text-gray-400">
-        <strong class="text-white">Goldilocks Zone Tips:</strong>
-        <ul class="list-disc ml-5">
-          <li>Talk Ratio: 59–63%</li>
-          <li>Patience: 0.4–0.6s after questions</li>
-          <li>Monologue: under 35s</li>
-          <li>Bundle in first 2 mins</li>
-          <li>Rapport in first 60–90s</li>
-        </ul>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-gray-800 p-4 rounded">
+        <h2 class="text-lg font-semibold mb-2">Behavioral Feedback</h2>
+        <ul id="behavioralFeedback" class="text-sm space-y-2 text-gray-300"></ul>
+      </div>
+      <div class="bg-gray-800 p-4 rounded">
+        <h2 class="text-lg font-semibold mb-2">Carrier Recommendations</h2>
+        <ul id="carrierSuggestions" class="text-sm space-y-2 text-green-300"></ul>
+        <p id="missedCarriers" class="text-sm mt-2 text-yellow-400"></p>
       </div>
     </div>
 
-    <div class="bg-gray-800 p-4 rounded mb-4">
-      <h2 class="text-lg font-semibold text-cyan-300 mb-2">Conversation Metric Graph</h2>
-      <canvas id="metricChart"></canvas>
-    </div>
-
-    <div class="bg-gray-800 p-4 rounded mb-4">
-      <h2 class="text-lg font-semibold text-purple-300 mb-2">Carrier Recommendations</h2>
-      <ul id="carrierSuggestions" class="text-sm space-y-2 text-green-300"></ul>
-      <p id="missedCarriers" class="text-sm mt-2 text-yellow-400"></p>
+    <div class="bg-gray-800 p-4 rounded mt-6">
+      <h2 class="text-lg font-semibold mb-2">Bind Process Checklist</h2>
+      <ul id="bindChecklist" class="text-sm space-y-2 text-white">
+        <li><label><input type="checkbox" class="mr-2" />Confirm household drivers to list or exclude</label></li>
+        <li><label><input type="checkbox" class="mr-2" />Ask underwriting questions</label></li>
+        <li><label><input type="checkbox" class="mr-2" />Customer registers on carrier website</label></li>
+        <li><label><input type="checkbox" class="mr-2" />Complete e-sign process</label></li>
+        <li><label><input type="checkbox" class="mr-2" />Mask call during payment</label></li>
+      </ul>
     </div>
   </div>
 </body>
