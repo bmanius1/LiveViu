@@ -1,120 +1,138 @@
-// script.js
-const demoToggle = document.getElementById("demoToggle");
-const transcriptEl = document.getElementById("transcript");
-const feedbackEl = document.getElementById("behavioralFeedback");
-const carrierEl = document.getElementById("carrierSuggestions");
-const missedEl = document.getElementById("missedCarriers");
-const stateInput = document.getElementById("stateSelect");
+// script.js (Real-Time Coaching - Call Flow Integrated Demo)
 
-const demoTranscript = [
-  "Agent: Thanks for calling, how can I help you today?",
-  "Customer: I’m shopping around, my rate went up again.",
-  "Agent: Got it. Who's your current carrier and what are you paying?",
-  "Customer: Progressive, and it's about $3200/year.",
-  "Agent: Wow, that’s high. We may be able to lower that — do you also need home insurance?",
-  "Customer: Yes, but it’s separate right now.",
-  "Agent: We can bundle those. That often saves 20-25%."
+const demoState = "TX";
+const stateInput = document.getElementById("stateSelect");
+const transcriptEl = document.getElementById("transcript");
+const behaviorList = document.getElementById("behavioralFeedback");
+const carrierList = document.getElementById("carrierSuggestions");
+const missedCarriers = document.getElementById("missedCarriers");
+const demoToggle = document.getElementById("demoToggle");
+
+const callScript = [
+  // INTRO
+  { speaker: "Agent", text: "Thanks for calling, this is Jordan at VIU by HUB. Who am I speaking with today?", tips: ["Always state your name and agency in intro."] },
+  { speaker: "Customer", text: "Hi, this is Mark Williams.", tips: [] },
+
+  // RAPPORT
+  { speaker: "Agent", text: "Great to meet you Mark! Thanks for taking time today — what inspired the call?", tips: ["Personalize the welcome and ask an open question."] },
+  { speaker: "Customer", text: "My renewal jumped. I’m frustrated honestly.", tips: ["Empathize with tone and acknowledge pain point."] },
+
+  // VERIFICATION
+  { speaker: "Agent", text: "Let's verify a few details before quoting — can I confirm your address and birthdate?", tips: ["Use confident tone during verification."] },
+  { speaker: "Customer", text: "Sure. It’s 456 Main Street, born 1/2/84.", tips: [] },
+
+  // DISCOVERY
+  { speaker: "Agent", text: "And what kind of coverage do you currently have? Are you bundling anything today?", tips: ["Start identifying gaps or bundling potential."] },
+  { speaker: "Customer", text: "Just auto. No bundle. I’m with Allstate.", tips: ["Now you can recommend bundle options."] },
+
+  // COVERAGE DISCUSSION
+  { speaker: "Agent", text: "Got it. Do you want to keep the same limits or explore more coverage for better protection?", tips: ["Offer choice of status quo vs upgrade."] },
+  { speaker: "Customer", text: "I’m open to options.", tips: [] },
+
+  // DISCOUNTS
+  { speaker: "Agent", text: "Perfect. You may qualify for safe driver, multi-policy, and paid-in-full discounts — let’s see what stacks.", tips: ["Stack at least 2 discounts during quote."],
+    carriers: ["Progressive + ASI", "Safeco", "Nationwide"] },
+
+  // BUNDLING
+  { speaker: "Agent", text: "If we bundle auto and home, we’re looking at ~22% savings on average in Texas.", tips: ["Bundle early — top agents mention it in the first 2 minutes."] },
+
+  // OBJECTION
+  { speaker: "Customer", text: "That still sounds expensive though...", tips: [] },
+  { speaker: "Agent", text: "Absolutely — and I want to respect your budget. Let’s compare your current coverage apples-to-apples.", tips: ["Use the ‘Absolutely’ method within 5 seconds."] },
+
+  // SALES PITCH
+  { speaker: "Agent", text: "So with the discounts and bundling, we’re at $178/month — $29 less than your current rate, with better liability and roadside included.", tips: ["Present value and savings clearly."] },
+
+  // CLOSING
+  { speaker: "Agent", text: "Would you prefer to start with the full coverage bundle or a liability-only version today?", tips: ["Offer choice instead of asking if they want it."] },
+  { speaker: "Customer", text: "Let’s go with the full coverage bundle.", tips: [] },
+
+  // FOLLOW-UP
+  { speaker: "Agent", text: "Awesome. I’ll send your docs now and follow up by email just in case you have questions.", tips: ["Always confirm next steps before ending."] }
 ];
 
-const coachingRules = {
-  talkRatio: "Try to stay between 59–63% agent talk time.",
-  patience: "Pause 0.4–0.6s after questions — it increases bind rate.",
-  monologue: "Keep your solo talking sections under 35s.",
-  bundleTiming: "Introduce bundle opportunities in the first 2 minutes.",
-  rapport: "Build rapport in the first 60–90s — even 5% rapport use = 43% more premium!"
-};
+const metricGraphData = [
+  { name: "Talk Ratio", value: 61, color: "#60a5fa" },
+  { name: "Patience (s)", value: 0.52, color: "#facc15" },
+  { name: "Monologue (s)", value: 31, color: "#34d399" }
+];
 
-const carrierGuide = {
-  TX: [
-    "Progressive (standard + bundling)",
-    "ASI (Progressive Home)",
-    "Safeco (strong bundles)",
-    "Dairyland (non-standard auto)",
-    "Foremost (older homes, manufactured homes)"
-  ]
-};
+function loadChart() {
+  const canvas = document.createElement("canvas");
+  canvas.id = "metricChart";
+  document.getElementById("metricGraph").appendChild(canvas);
 
-const missedCarriers = {
-  TX: ["Root (great for no prior/SR-22 drivers)"]
-};
-
-let metricChart = null;
-
-function runDemo() {
-  stateInput.value = "TX";
-  transcriptEl.innerHTML = "";
-  feedbackEl.innerHTML = "";
-  carrierEl.innerHTML = "";
-  missedEl.innerHTML = "";
-
-  const metricData = {
-    labels: ["Talk Ratio", "Patience (s)", "Monologue (s)"],
-    datasets: [
-      {
-        label: "Live Metrics",
-        data: [67, 0.51, 34],
-        backgroundColor: ["#60a5fa", "#34d399", "#fbbf24"],
-        borderColor: "#1f2937",
-        borderWidth: 1
-      }
-    ]
-  };
-
-  if (metricChart) metricChart.destroy();
-  const ctx = document.getElementById("metricChart").getContext("2d");
-  metricChart = new Chart(ctx, {
+  new Chart(canvas, {
     type: "bar",
-    data: metricData,
+    data: {
+      labels: metricGraphData.map((d) => d.name),
+      datasets: [
+        {
+          label: "Performance Metrics",
+          data: metricGraphData.map((d) => d.value),
+          backgroundColor: metricGraphData.map((d) => d.color)
+        }
+      ]
+    },
     options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.y}` } }
-      },
       scales: {
-        y: { beginAtZero: true, max: 100 }
+        y: {
+          beginAtZero: true,
+          suggestedMax: 100
+        }
+      },
+      plugins: {
+        legend: { display: false }
       }
     }
   });
-
-  let delay = 0;
-  demoTranscript.forEach((line, i) => {
-    setTimeout(() => {
-      const p = document.createElement("p");
-      p.textContent = line;
-      transcriptEl.appendChild(p);
-      transcriptEl.scrollTop = transcriptEl.scrollHeight;
-    }, delay);
-    delay += 1200;
-  });
-
-  setTimeout(() => {
-    for (const tip in coachingRules) {
-      const li = document.createElement("li");
-      li.textContent = coachingRules[tip];
-      feedbackEl.appendChild(li);
-    }
-  }, delay + 1000);
-
-  setTimeout(() => {
-    carrierGuide["TX"].forEach(c => {
-      const li = document.createElement("li");
-      li.textContent = c;
-      carrierEl.appendChild(li);
-    });
-    missedEl.textContent = "Other options not quoted but available: " + missedCarriers["TX"].join(", ");
-  }, delay + 2000);
 }
 
-demoToggle.addEventListener("change", () => {
-  if (demoToggle.checked) {
-    runDemo();
+function runStepDemo() {
+  stateInput.value = demoState;
+  transcriptEl.innerHTML = "";
+  behaviorList.innerHTML = "";
+  carrierList.innerHTML = "";
+  missedCarriers.innerText = "";
+
+  let i = 0;
+  const interval = setInterval(() => {
+    const line = callScript[i];
+    const speakerClass = line.speaker === "Agent" ? "text-blue-400" : "text-green-400";
+    transcriptEl.innerHTML += `<p><span class="${speakerClass}">${line.speaker}:</span> ${line.text}</p>`;
+    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+
+    if (line.tips.length) {
+      line.tips.forEach((tip) => {
+        const li = document.createElement("li");
+        li.className = "bg-gray-700 p-2 rounded";
+        li.textContent = tip;
+        behaviorList.appendChild(li);
+      });
+    }
+
+    if (line.carriers?.length) {
+      carrierList.innerHTML = line.carriers.map((c) => `<li>${c}</li>`).join("");
+      missedCarriers.innerText = "Also consider Root or Foremost for monoline auto if bundling fails.";
+    }
+
+    i++;
+    if (i >= callScript.length) {
+      clearInterval(interval);
+      loadChart();
+    }
+  }, 3000);
+}
+
+demoToggle.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    runStepDemo();
   } else {
     transcriptEl.innerHTML = "";
-    feedbackEl.innerHTML = "";
-    carrierEl.innerHTML = "";
-    missedEl.innerHTML = "";
+    behaviorList.innerHTML = "";
+    carrierList.innerHTML = "";
+    missedCarriers.innerText = "";
+    document.getElementById("metricGraph").innerHTML = "";
     stateInput.value = "";
-    if (metricChart) metricChart.destroy();
   }
 });
